@@ -1,0 +1,32 @@
+steps:
+  - label: Build
+    commands:
+      - bash ./deploy/scripts/build.sh
+  
+  - wait 
+    
+  - label: Plan Dev
+    commands:
+      - bash ./deploy/scripts/plan.sh dev
+    artifact_paths:
+      - "deploy/environments/dev/terraform.tfplan"
+
+  - label: Plan Live
+    commands:
+      - bash ./deploy/scripts/plan.sh live
+    artifact_paths:
+      - "deploy/environments/live/terraform.tfplan"
+
+  - wait
+
+  - label: Apply Dev
+    commands:
+      - buildkite-agent artifact download "deploy/environments/dev/terraform.tfplan" .
+      - bash ./deploy/scripts/apply.sh dev
+
+  - wait
+
+  - label: Apply Live
+    commands: 
+      - buildkite-agent artifact download "deploy/environments/live/terraform.tfplan" .
+      - bash ./deploy/scripts/apply.sh live
